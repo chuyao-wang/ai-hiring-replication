@@ -1,5 +1,10 @@
 # Figures and statistics for the AI-hiring conjoint paper — reproducible package
 
+> This paper forms Chapter 4 of the author's PhD thesis. Thesis Figure 4.x /
+> Table 4.x correspond to `figureX` / `tableX` here, and the section numbers
+> cited in this README (e.g. Sec 4.1) are the standalone paper's, not the
+> thesis chapter's.
+
 Regenerates all ten figures **directly from the raw data**
 (`data/conjoints.csv`, `data/respondents.csv`) as **600-dpi PNG** and **vector
 PDF**, from a single shared **black-and-white** theme, and reproduces the
