@@ -18,6 +18,7 @@ AI_hiring_all_replication/
 ├── requirements.txt
 ├── analysis.py               ← computes every figure input from the raw CSVs
 ├── reproduce_statistics.py   ← reproduces every reported number NOT in a figure
+├── robustness_appendix_f.py  ← specification checks behind Appendix F
 ├── figstyle.py               ← shared theme + palette + save helper
 ├── figure_data.py            ← table-sourced constants (fallback if CSVs absent)
 ├── make_figures.py           ← one function per figure; uses analysis.py by default
@@ -33,6 +34,7 @@ AI_hiring_all_replication/
 pip install -r requirements.txt
 python analysis.py             # prints the figure inputs as a check
 python reproduce_statistics.py # prints every other reported number vs the paper
+python robustness_appendix_f.py # Appendix F specification checks
 python make_figures.py         # all figures -> ./figures/ (computed from data/)
 python make_figures.py fig1 fig4   # only the named figures
 ```
@@ -80,6 +82,15 @@ wording. Both match the note in Section 3.2 of the manuscript.
   revealed human-preference and the stated attitudes (App H), and the
   **homogeneous-null SD 95% interval,
   [0.259, 0.276]** (fixed seed `20260707`, 10,000 replications).
+
+* **`robustness_appendix_f.py`** re-estimates the primary AMCE model under each
+  data-quality restriction and each positional control and reports how far every
+  attribute effect moves from the baseline. Applied one at a time, no restriction
+  or control moves an AMCE by more than **0.003** in choice probability; dropping
+  all three quality flags at once moves one by at most **0.005**. Note that
+  `attr_row_order` records the displayed order of the six attributes as a list and
+  takes 720 distinct values; the script controls for the row position each
+  attribute occupied rather than treating the permutation as a factor.
 
 **Version sensitivity.** Point estimates and 95% CIs reproduce exactly. The
 *p-values of the non-significant interactions* (Table E2) depend on the
