@@ -31,18 +31,26 @@ AI_hiring_all_replication/
 
 ## How to regenerate
 
+Python 3.9 or later. Run these from the repository root: the scripts resolve
+`data/` and `figures/` relative to the working directory.
+
 ```bash
-pip install -r requirements.txt
-python analysis.py             # prints the figure inputs as a check
-python reproduce_statistics.py # prints every other reported number vs the paper
-python robustness_appendix_f.py # Appendix F specification checks
-python make_figures.py         # all figures -> ./figures/ (computed from data/)
-python make_figures.py fig1 fig4   # only the named figures
+pip3 install -r requirements.txt
+python3 analysis.py              # prints the figure inputs as a check
+python3 reproduce_statistics.py  # prints every other reported number vs the paper
+python3 robustness_appendix_f.py # Appendix F specification checks
+python3 make_figures.py          # all figures -> ./figures/ (computed from data/)
+python3 make_figures.py fig1 fig4   # only the named figures
 ```
 
-`make_figures.py` calls `analysis.compute_all()` on the two CSVs. If the data
-were removed, it falls back to the constants in `figure_data.py` (and marks
-Figure H1 and `figureS3` as illustrative). With the data present, everything is exact.
+`make_figures.py` calls `analysis.compute_all()` on the two CSVs. If the CSVs
+cannot be read — including when the script is run from a directory other than
+the repository root — it falls back silently to the constants in
+`figure_data.py`, exits 0, and prints the same lines as a successful run; only
+Figure H1 and `figureS3` are marked as illustrative. Those constants agree with
+the computed values to three decimals, so no plotted value is wrong, but the
+figures are then table-sourced rather than computed. Run from the repository
+root to be sure the microdata are used.
 
 ## The estimation (reproduces the manuscript)
 
@@ -54,10 +62,10 @@ against "AI decides alone", and each procedural feature as a 0/1 indicator.
 original names; they map to the manuscript's terms as follows:
 `decision_process_code` = decision authority, `accuracy_pct` = error rate
 (share of qualified applicants wrongly rejected), `transparency` = explanation.
-Manuscript Table 2 is a screenshot of the live instrument and shows the full
-on-screen wording ("Decision process"; "Accuracy (qualified applicants wrongly
-rejected)"; "Transparency"); the generated `table2_task_mockup` mirrors that
-wording. Both match the note in Section 3.2 of the manuscript.
+Manuscript Table 2 is a screenshot of the live instrument; its attribute rows
+read "Decision process", "Accuracy" and "Transparency", with the wrongly-rejected
+share stated in the cells rather than the row label. The generated
+`table2_task_mockup` mirrors that layout. Both match the note in Section 3.2 of the manuscript.
 
 * **`analysis.py`** verifies the figure inputs — AMCEs (Table C1), marginal means
   (Table C3), error-rate moderations and equivalence (Table D1), complementarity
@@ -88,17 +96,21 @@ wording. Both match the note in Section 3.2 of the manuscript.
   data-quality restriction and each positional control and reports how far every
   attribute effect moves from the baseline. Applied one at a time, no restriction
   or control moves an AMCE by more than **0.003** in choice probability; dropping
-  all three quality flags at once moves one by at most **0.005**. Note that
+  all three quality flags at once moves one by at most **0.005** (**0.008** if the
+  20-percentage-point error-rate gain is counted). Note that
   `attr_row_order` records the displayed order of the six attributes as a list and
   takes 720 distinct values; the script controls for the row position each
   attribute occupied rather than treating the permutation as a factor.
 
-**Version sensitivity.** Point estimates and 95% CIs reproduce exactly. The
-*p-values of the non-significant interactions* (Table E2) depend on the
-finite-sample cluster-robust correction and can move in the second decimal
-across library versions; each remains non-significant, so no conclusion changes.
-Pin the versions in `requirements.txt` (e.g. `pip freeze > locked.txt`) for
-bitwise agreement.
+**Version sensitivity.** Point estimates and 95% confidence intervals reproduce
+to the third decimal, not bitwise: across the range of library versions that
+`requirements.txt` admits, one conditional AMCE moves between +0.150 and +0.149,
+and one interval bound between [0.048, 0.063] and [0.047, 0.063]. The
+*p-values of the non-significant interactions* (Table E2) differ from the
+manuscript's by 0.02 to 0.06; they arise from the finite-sample cluster-robust
+correction, and each remains far from significance, so no conclusion changes.
+`requirements.txt` sets lower bounds only; pin exact versions
+(e.g. `pip3 freeze > locked.txt`) if you need bitwise agreement.
 
 ## Data provenance — all figures EXACT (computed from `data/`)
 
@@ -126,9 +138,9 @@ bitwise agreement.
   equivalent case; open square = the contrast baseline or the flagged
   exception) and **line style** (solid = focal series; dashed = baseline /
   reference lines), never on hue. Human involvement — the one estimate
-  that behaves as an exception — is marked by an open square plus a short
-  "not equivalent" tag (Figures 2A and 5), so the encoding is consistent and
-  prints cleanly in black and white.
+  that behaves as an exception — is marked by an open square
+  (Figures 2A and 5), so the encoding is consistent and prints cleanly in
+  black and white.
 * **Typography matches the manuscript** (Liberation Serif ≡ Times metrics; STIX
   maths).
 * **True print resolution** — 600-dpi PNG + editable vector PDF (fonts embedded,
@@ -136,12 +148,57 @@ bitwise agreement.
 * **Figure 1** groups the attributes and sets the continuous error-rate effect
   apart (open marker) with a full-range annotation (≈ −0.285 across
   10→30%), defusing the unit-mixing hazard of the original.
-* **Figure 2** styles human involvement as the open-square "not
-  equivalent" exception; Panel B shows the exact contrasts and a floor note.
+* **Figure 2** styles human involvement as the open-square exception; Panel B
+  shows the exact contrasts and a floor note.
 * **Figure 3** joins each pair with a shift line, orders by the size of the shift
-  so the flat opt-out ends the sequence, and labels Δ and "≈0 (unchanged)".
+  so the flat opt-out ends the sequence, and labels each Δ.
 * **Figure 4** adds marginal histograms, a diagonal reference line, and an
-  outlined doubt-but-engage box (150; 7.8%).
+  outlined doubt-but-engage box (n = 150, 7.8% of respondents).
+
+## Ethics, consent and data provenance
+
+The study received ethical approval from the Department of Methodology at the
+London School of Economics and Political Science on 28 May 2026. All
+participants provided informed consent and were compensated. Respondents were
+recruited through Prolific; the pre-analysis plan was posted publicly on the
+Open Science Framework on 17 June 2026 (https://osf.io/5ju4d/).
+
+`data/respondents.csv` and `data/conjoints.csv` are de-identified. They carry no
+Prolific IDs, no email addresses, no IP addresses, no timestamps and no
+free-text fields; `respondent_id` is a within-study serial number. Prolific's
+`DATA_EXPIRED` placeholder appears where a participant's demographic record had
+already expired at export. The demographic columns are those reported in the
+thesis sample table (Table 3.B1) and are retained so that table can be
+reproduced from this package.
+
+`batch` records the collection round: ids 1-150 come from the final pilot and
+ids 151-1919 from the main study. Both are pooled in the analysis, as the
+manuscript states; `reproduce_statistics.py` reports the batch indicator
+(coefficient +0.0003, p = 0.94).
+
+## Correspondence with the thesis
+
+The thesis renumbers this paper's displays with a chapter prefix: manuscript
+Figure N is thesis Figure 3.N, manuscript Table N is thesis Table 3.N, and
+appendix objects take the same prefix, so manuscript Table C1 is thesis
+Table 3.C1 and Appendix H's figure is thesis Figure 3.H1. Appendix letters are
+reused across chapters of the thesis, so an unqualified "Appendix H" here means
+this paper's Appendix H. Thesis Table 3.1 lists the attributes as shown to
+respondents and has no generated counterpart in this package; the same content
+appears in the `table2_screenshot.png` instrument capture.
+
+## Licence
+
+Copyright (c) 2026 Chuyao Wang. All rights not expressly granted are reserved.
+
+This package — code, data and figures — is released under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International licence (CC BY-NC-SA
+4.0): https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+You may copy, redistribute and adapt the material for non-commercial purposes,
+provided you give attribution and license any adapted material under the same
+terms. Commercial use requires the author's prior written permission. See
+`LICENSE`.
 
 ## Notes
 
